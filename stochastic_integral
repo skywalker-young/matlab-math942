@@ -1,0 +1,32 @@
+% Calculates the Ito and Stratonovich integrals of Brownian motion
+
+clear
+clf
+
+% Initialise variables
+T = 1; J = 100000; 
+dt = T/J;
+
+
+% Calculates Brownian motion
+dW = sqrt(dt)*randn(1,J);
+W = cumsum(dW);
+
+% Calculates Ito integral
+ito = sum([0 W(1:end-1)].*dW);
+
+% Calculates Stratonovich integral
+%strat = sum((0.5*([0 W(1:end-1)] + W) + 0.5*sqrt(dt)*randn(1,J)).*dW);
+dW_now = dW(1:2:J-1)+dW(2:2:J);
+strat = sum(W(1:2:J-1).*dW_now);
+
+% Calculates error between numerical and theoretical values of the integral
+itoerr = abs(ito - 0.5*(W(end)^2 - T));
+straterr = abs(strat - 0.5*W(end)^2);
+
+% Output results to screen
+fprintf('Ito integral = %f\n',ito)
+fprintf('Error = %f\n',itoerr)
+fprintf('Stratonovich integral = %f\n',strat)
+fprintf('Error = %f\n',straterr)
+
