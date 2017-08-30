@@ -1,0 +1,53 @@
+% Euler-Maruyama method for the SDE dX_t = mu X_t dt + sigma X_t d W_tw
+
+clear
+clf
+
+% Repeatable trials on/off
+%randn('state',100)
+
+% Input model parameters
+mu = 2; sigma = 1; X0 = 1; T = 1;
+
+% Input number of sample paths
+I = 1000;
+
+% Initialise variables for Brownian motion
+J = 2^8; dt = T/J;
+
+% Preallocate array
+Xerr = zeros(I,5);
+
+% Sample over discrete Brownian paths
+for i = 1:I
+   % Calculates Brownian motion
+   dW = sqrt(dt)*randn(1,J);
+   W = cumsum(dW);
+   
+   % Calculate exact X_T
+   Xtrue = X0*exp((mu-0.5*sigma^2)*T+sigma*W(end));
+   
+   for p = 1:5   %Calculate solutions using five different du 
+   % Initialise variables for SDE
+      R = 2^(p-1); K = J/R; du = R*dt;
+      Xtemp = X0;
+      for k = 1:K
+         Winc = sum(dW((k-1)*R+1:k*R));
+         Xtemp = Xtemp+mu*Xtemp*du+sigma*Xtemp*Winc;
+      end  
+      % Store error at t = T
+      Xerr(i,p) = abs(Xtemp-Xtrue);% endpoint error in the ith path with pth stepsize, is an I*P matrix
+   end
+end
+
+duvals = (2.^([0:4]))*dt;% different du values
+plot(log(duvals),log(mean(Xerr)),'*-b') % mean(Xerr) reurns a vector with p values. 
+hold on
+plot(log(duvals),0.5*log(duvals),'--r')% a line with slope 1/2 is added for comparison.
+legend('Strong numerical error','Reference line of slope 0.5')
+xlabel('log of du')
+ylabel('log Sample average of |X(U_K) - X_(U_K)|')
+
+
+
+
