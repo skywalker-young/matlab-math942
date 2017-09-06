@@ -1,0 +1,24 @@
+% Monte Carlo for E(X),where X = e^Z and Z is N(0,1)
+
+clf
+clear
+%rand('state',0)
+EX = sqrt(exp(1));
+plot([log(2^4) log(2^16)],[EX EX],'-b')
+%legend('Expected value')
+hold on
+
+for M = 2.^[4:16]
+   X = exp(randn(M,1));
+   aM = mean(X);
+   bM = std(X);
+   conf_int = [aM-1.96*bM/sqrt(M) aM+1.96*bM/sqrt(M)];
+   plot(log(M),aM,'xr')
+   hold on
+   plot([log(M) log(M)],conf_int,'-g')   
+end
+
+legend('Expected value','Sample mean','Confidence intervals')
+xlabel('Log of number of samples')
+ylabel('Sample mean')
+
