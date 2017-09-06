@@ -1,0 +1,32 @@
+% Monte Carlo method for calculating the call price
+
+clf
+clear
+
+S0 = 10; E = 5; T = 1; r = 0.02; sigma = 0.25;
+phi = @(x) max(x-E,0);
+
+[call put] = blsprice(S0,E,r,T,sigma,0);
+plot([log(2^4) log(2^16)],[call call])
+hold on
+
+%printf('Call price = %f\n\n',call)
+
+for M = 2.^[5:15]
+   for i = 1:M
+      ST = S0*exp((r-0.5*sigma^2)*T+sigma*sqrt(T)*randn);
+      V(i) = exp(-r*T)*phi(ST);
+   end
+   aM = mean(V);
+   bM = std(V);
+   conf_int = [aM-1.96*bM/sqrt(M) aM+1.96*bM/sqrt(M)];
+   plot(log(M),aM,'xr')
+   hold on
+   plot([log(M) log(M)],conf_int,'-g')
+   hold on
+   %printf('No. of samples = %d   Option price approximation = %f\n',M,aM)
+end
+legend('Black-Scholes call price','Option price approximation','Confidence intervals')
+xlabel('Log of number of samples')
+ylabel('Option price approximation')
+
